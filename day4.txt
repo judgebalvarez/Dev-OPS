@@ -1,0 +1,602 @@
+Fundamentas of Ciso 
+
+Task 1: review of OSI Layer
+
+
+@cmd 
+powershell
+set-netfirewallprofile -name public,private,domain -enabled false
+
+Task 2: Lusot kaba sa Job Interview for cyber sec pos.
+1.) What do you call pdu in transport layer
+Source port. Destination port
+Reliable TCP  : SAW- Sequence Ac Window "3 way Handshake"
+Unrealiable UDP
+
+2. Layer 3 PDU:
+s: IP
+d: DIP
+
+3. name these ports
+ssh 22
+dns 53
+ftp 20/21
+tftp 69
+http 80
+https 443
+telnet 23 
+
+4. VPN 
+   1.Tunnelling = gre ,
+   2.Encrytion
+   3. Hashing
+   
+5. Voltage
+   Interface
+   Trasmission
+   Fiber: LC , SC(bahay)
+   RJ45: 
+   Lazer:1510 / 850 
+
+
+netstat -s -p tcp
+
+nmap -v 10.m.100.0
+
+
+
+basic network security
+ UTM = unified threat management 
+ 
+ firewall: aaplication/ stateful FW (layer 1-7) vs Packet Filter Firewall (layer 2-4)
+ 
+ 
+ Task 4:  Cisco Access-list
+ Standard ACL: check source IP
+ block :russia , china, NK , all ip add.
+ 
+ 
+extended ACL sip,dip, Sport, Dport
+ 
+
+ex. 1 Completely block the other side using standard ACL on Edge
+@edge
+conf t
+	no access-list 1
+	access-list 1 deny 10.52.0.0 0.0.255.255
+	access-list 1 deny 10.42.0.0 0.0.255.255
+	access-list 1 deny 10.32.0.0 0.0.255.255
+	access-list 1 deny 10.22.0.0 0.0.255.255
+	access-list 1 deny 10.12.0.0 0.0.255.255
+	access-list 1 permit any
+	int gi 0/0/1
+	ip access-group 1 in
+	do sh ip access-list 1
+
+
+unlock ACL
+
+
+conf t	
+	int gi 0/0/1
+	no ip access-group 1 in
+	do sh ip access-list 1
+	
+	
+	
+	conf t	
+	int gi 0/0/1
+	no ip access-group 2 in
+	do sh ip access-list 2
+	
+	conf t	
+	int gi 0/0/1
+	no ip access-group 3 in
+	do sh ip access-list 3
+	
+	conf t	
+	int gi 0/0/1
+	no ip access-group 4 in
+	do sh ip access-list 4
+	
+ex.2 : use ex.2 
+
+conf t
+	no access-list 3
+	access-list 3 deny 10.21.0.0 0.0.255.255
+	access-list 3 deny 10.22.0.0 0.0.255.255
+	access-list 3 deny 10.31.0.0 0.0.255.255
+	access-list 3 deny 10.32.0.0 0.0.255.255
+	access-list 3 deny 10.41.0.0 0.0.255.255
+	access-list 3 deny 10.42.0.0 0.0.255.255
+	access-list 3 permit any
+	int gi 0/0/1
+	ip access-group 3 in
+	do sh ip access-list 3
+
+ex.4 use the automatic deny any
+
+conf t
+no access-list 4 
+access-list 4 permit 10.52.0.0 0.0.255.255
+int gi 0/0/1
+ip access-group 4 in
+end
+
+
+conf t
+	no access-list 5
+	access-list 5 deny 10.12.0.0 0.0.255.255
+	access-list 5 deny 10.21.0.0 0.0.255.255
+	access-list 5 deny 10.22.0.0 0.0.255.255
+	access-list 5 deny 10.31.0.0 0.0.255.255
+	access-list 5 deny 10.32.0.0 0.0.255.255
+	access-list 5 permit any
+	int gi 0/0/1
+	ip access-group 5 in
+	do sh ip access-list 5
+	
+	
+	
+other used of standard acl 
+allow only your own telnet/ssh your edge
+@edge
+conf t
+access-list 6 permit 10.51.0.0 0.0.255.255
+access-list 6 permit 200.51.0.0 0.0.0.0
+
+unlock
+@allow all:
+line vty 0 14
+no access-class 6 in
+end
+
+task 6
+
+config t
+int fa 0/0
+ ip add 10.51.100.9 255.255.255.0 Secondary
+service finger
+service tcp-small-servers
+service udp-small-servers
+ip dns server
+ip http server
+ip http secure-server
+!Make Ping EASY
+ip host pc 10.51.1.10
+ip host cm 10.51.100.8
+ip host cm2 10.51.100.9
+ip host p1 10.51.100.101
+ip host p2 10.51.100.102
+ip host sw 10.51.1.4
+ip host ed 10.51.51.1
+
+
+
+open port sa cucm
+PORT     STATE SERVICE
+7/tcp    open  echo
+9/tcp    open  discard
+13/tcp   open  daytime
+19/tcp   open  chargen
+22/tcp   open  ssh
+23/tcp   open  telnet
+53/tcp   open  domain
+79/tcp   open  finger
+80/tcp   open  http
+443/tcp  open  https
+1720/tcp open  h323q931
+2000/tcp open  cisco-sccp
+2002/tcp open  globe
+4002/tcp open  mlchat-proxy
+5060/tcp open  sip
+5061/tcp open  sip-tls
+6002/tcp open  X11:2
+9002/tcp open  dynamid
+
+
+delikado ang port 19 
+
+takas command : disco 1
+crtl shift 6 x
+
+
+
+Task 6L configure an extended acl Policy
+
+cm open only http, https
+cm2 open only dns, ssh
+formula: protocal hacker victim port:
+
+	tcp ,
+	udp ,
+	icmp ,
+all =ip
+@cucm
+conf t
+no access-list 100
+access-list 100 permit tcp any host cm eq 80
+access-list 100 permit tcp any host cm eq 443
+access-list 100 permit tcp any host cm eq 2000
+access-list 100 permit tcp any host cm2 eq 53
+access-list 100 permit tcp any host cm2 eq 22
+int fa 0/0 
+ip access-group 100 in 
+do sh ip access-list 100
+
+
+
+stealts scan
+
+
+convert to name 
+
+conf t
+no ip access-list Extended fp1
+ip access-list Extended fp1
+permit tcp any host cm eq 80
+permit tcp any host cm eq 443
+permit tcp any host cm eq 2000
+permit tcp any host cm2 eq 53
+100 permit tcp any host cm2 eq 22
+int fa 0/0 
+ip access-group fp1 in 
+do sh ip access-list fp1
+
+
+unlock 
+conf t
+int fa 0/0 
+no ip access-group fp1 in 
+
+
+ex.2
+allow these
+cm = ssh,telnet,http
+cm2 = http,https,dns,sscp
+
+
+conf t
+no ip access-list Extended fp2
+ip access-list Extended fp2
+permit tcp any host cm eq 22
+permit tcp any host cm eq 23
+permit tcp any host cm eq 80
+permit tcp any host cm2 eq 80
+permit tcp any host cm2 eq 443
+permit tcp any host cm2 eq 53
+permit tcp any host cm2 eq 2000
+int fa 0/0 
+ip access-group fp2 in 
+do sh ip access-list fp2
+
+==============================
+
+
+conf t
+no ip access-list Extended fp3
+ip access-list Extended fp3
+permit tcp any host cm eq 53
+permit tcp any host cm eq 443
+permit tcp any host cm eq 2000
+permit icmp any host cm2
+permit tcp any host cm2 eq 80
+int fa 0/0 
+ip access-group fp3 in 
+do sh ip access-list fp3
+
+eq,gt,lt,neq,range
+
+==============================
+cm = open only above 100
+
+cm = open oly between 20 -> 80
+
+
+conf t
+no ip access-list Extended fp4
+ip access-list Extended fp4
+permit tcp any host cm gt 100
+permit tcp any host cm2 range 20 80
+int fa 0/0 
+ip access-group fp4 in 
+do sh ip access-list fp4
+
+===============================
+
+task 7: the most important lab ever:
+Exam: June/july ->
+
+5 lab: dhcp,acl ,ssh, nat, ntp. x300 usd bye
+
+home lab: cisco csr1000v + 4 linux 4pc.
+
+download vladan tiny linux
+
+linux2A
+sudo ifconfig eth0 192.168.102.21 netmask 255.255.255.0 up
+sudo route add default gw 192.168.102.5
+
+linux2b
+sudo ifconfig eth0 192.168.102.22 netmask 255.255.255.0 up
+sudo route add default gw 192.168.102.5
+
+linux3A
+sudo ifconfig eth0 192.168.103.31 netmask 255.255.255.0 up
+sudo route add default gw 192.168.103.5
+
+
+
+UTM:
+config t
+no logging console
+int gi 1
+no shut
+ip add 192.168.108.5 255.255.255.0
+no shut
+int gi 2
+no shut
+ip add 192.168.102.5 255.255.255.0
+no shut
+int gi 3
+no shut
+ip add 192.168.103.5 255.255.255.0
+end
+
+
+
+
+give internet to cisco utm
+
+conf t
+ip name-server 8.8.8.8
+ip route 0.0.0.0 0.0.0.0 192.168.108.2   
+do sh ip route
+
+
+give internet to all linux via NAT
+
+
+Network Address Translation
+
+Nat inside
+192.168.102.22 			
+192.168.102.21		192.168.108.121
+192.168.103.31		192.168.108.131
+
+3 Steps to  NAT internet sharing
+@ciscoutm 
+conf t
+access-list 8 permit 192.168.102.0 0.0.0.225
+access-list 8 permit 192.168.103.0 0.0.0.225
+!define inside vs outside
+
+int gi 1
+ip nat outside
+int gi 2
+ip nat inside
+int gi 3
+ip nat inside
+
+!step3: create a static Nat pool with overload
+ip nat inside source static 192.168.102.21 192.168.108.121
+ip nat inside source static 192.168.103.31 192.168.108.131
+!for every one else:hiram mo ip of gi 1
+ip nat inside source list 8 int gi 1 overload
+do sh ip nat translation
+
+
+=========================================
+synchronized with network time protocol
+
+time.google.com -> us
+@Utm 3rd lab
+
+sh clock
+conf t
+NTP server pool.ntp.org
+do sh ntp association
+do sh clock
+
+=========================
+enable ssh version 2 on any cisco device
+
+encrypt with ssh 
+@utm
+
+conf t
+ip domain-name rivanit.com
+!create new rsa public/private key
+crypto key generate rsa
+ip ssh version 2 
+!type 1024
+end
+=============================
+
+extended access list on cisco utm
+@utm
+create a fp7 where? 192.168.102.5 open is web,https
+192.168.103.5 open telnet,ssh
+
+conf t 
+no ip access-list Extended fp7
+ip access-list Extended fp7
+permit tcp any host 192.168.102.5 eq 80
+permit tcp any host 192.168.102.5 eq 443
+permit tcp any host 192.168.103.5 eq 23
+permit tcp any host 192.168.103.5 eq 22
+int gi 2
+ip access-group fp7 in 
+int gi 3
+ip access-group fp7 in 
+do sh ip access-list fp7
+
+===================================
+
+open dns, finger, on utm:
+
+conf t 
+ip dns server
+service finger
+service tcp-small-server
+service udp-small-server
+int gi 2
+no ip access-group fp7 in 
+int gi 3
+no ip access-group fp7 in 
+
+=======================================
+
+create fp8
+192.168.102.5 open ping, dns, chargen
+192.168.103.5 open http,https,ssh,telnet
+
+conf t 
+no ip access-list Extended fp8
+ip access-list Extended fp8
+permit icmp any host 192.168.102.5 
+permit tcp any host 192.168.102.5 eq 53
+permit tcp any host 192.168.102.5 eq 19
+permit tcp any host 192.168.103.5 eq 80
+permit tcp any host 192.168.103.5 eq 443
+permit tcp any host 192.168.103.5 eq 22
+permit tcp any host 192.168.103.5 eq 23
+int gi 2
+ip access-group fp8 in 
+int gi 3
+ip access-group fp8 in 
+do sh ip access-list fp8
+
+==============================================
+
+task9; Configuring cisco automation with DNAC
+Promote VS Terminate
+
+
+Real Pc vs VM vs 						dockers
+i5		vmware 						
+16gb	linux: 2cpu/4gbx2
+
+
+
+import cli
+
+akoito = [
+    "show ip int brief",
+]
+
+for c in akoito:
+    cli.executep(c)
+	
+	
+=======================	
+	
+	import cli
+
+watever = [
+    "show version",
+]
+
+for c in watever:
+    cli.executep(c)
+	
+=================	
+	
+import cli
+
+snake1 = '''hostname ANACONDA
+'''
+
+cli.configurep(snake1)
+
+=========================
+
+import cli
+
+tatloagad = '''hostname PYDEVOP_AKO
+int loop 4
+ip add 4.4.4.4 255.255.255.255
+int loop 5
+ip add 5.5.5.5 255.255.255.255
+int loop 6
+ip add 6.6.6.6 255.255.255.255
+int loop 7
+ip add 7.7.7.7 255.255.255.255
+end
+'''
+
+cli.configurep(tatloagad)
+
+==========================================
+
+
+task 10: how to use postman to configure Cisco Devices Automatically
+liitsweldo: console ssh, telnet
+
+laki: ansible,linux postman
+
+step 1. use the ciscocollection.json from ccna2 
+
+step 2. ITSCi sabotahe
+
+@utm to connect in postman
+
+config t
+ip http secure-server
+ip http authentication local
+restconf
+netconf-yang
+end
+
+
+config t
+!username admin privilege 15 secret pass
+ip http secure-server
+ip http authentication local
+restconf
+end
+
+====================================
+
+{
+    "ietf-interfaces:interface": {
+        "name": "Loopback100",
+        "description": "Configured by RESTCONF",
+        "type": "iana-if-type:softwareLoopback",
+        "enabled": true,
+        "ietf-ip:ipv4": {
+            "address": [
+                {
+                    "ip": "172.16.100.1",
+                    "netmask": "255.255.255.0"
+                }
+            ]
+        }
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

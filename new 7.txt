@@ -1,0 +1,338 @@
+!Static Routing on P1
+@p1
+
+conf t
+	ip route 192.168.1.129 255.255.255.255 10.2.1.2
+	ip route 192.168.1.128 255.255.255.254 10.2.1.1
+	
+	
+	p1:
+config T
+ip route 0.0.0.0  0.0.0.0 10.2.1.1
+do sh ip route static
+
+p2:
+config T
+ip route 0.0.0.0  0.0.0.0 10.2.1.2
+do sh ip route static
+
+
+d1 eigrp
+
+config t
+router eigrp 100
+ no auto-summary
+ network 10.1.4.4 0.0.0.3
+ network 10.2.1.0 0.0.0.255
+ network 10.2.2.0 0.0.0.255
+ network 192.168.1.128 0.0.0.31
+end
+
+
+task 6 
+Real world ospf  config.
+
+conf t 
+	router ospf 1
+	network 
+	
+	
+	
+	
+	
+task 7 route re distribution
+
+	ipasok eigrp sa ospf : not racist
+	
+	conf t 
+		router ospf 1
+		redistribute eigrp 100 subnets
+		
+R4: ipasok ospf sa eigrp
+
+conf t
+router eigrp 100
+redistribute ospf 1 metric 10000 100 255 1 1500
+	
+	
+AS / Autonomous system number a group og bgp  enabled routers under the same admin/ group.
+
+BGP skills 
+
+BGP:
+r1:
+ neighbor 208.8.8.4 remote-as 45
+ neighbor 207.7.7.2 remote-as 2
+ neighbor 209.9.9.3 remote-as 3
+
+
+isp1
+neighbor 24.2.4.2 remote-as 2
+neighbor 45.4.5.5 remote-as 45
+neighbor 208.8.8.1 remote-as 1
+
+isp2
+neighbor 24.2.4.4 remote-as 45
+neighbor 25.2.5.5 remote-as 45
+neighbor 32.3.2.3 remote-as 3
+neighbor 207.7.7.1 remote-as 1
+
+isp3
+neighbor 32.3.2.2 remote-as 2
+neighbor 35.3.5.5 remote-as 45
+neighbor 209.9.9.1 remote-as 1
+
+isp4
+
+neighbor 25.2.5.2 remote-as 2
+ neighbor 35.3.5.3 remote-as 3
+ neighbor 45.4.5.4 remote-as 45
+=================
+config t
+router bgp 1
+ bgp log-neighbor-changes
+ neighbor 208.8.8.4 remote-as 45
+ neighbor 207.7.7.2 remote-as 2
+ neighbor 209.9.9.3 remote-as 3
+ network 10.0.0.0 Mask 255.255.255.252
+ network 207.7.7.0
+ network 208.8.8.0
+ network 209.9.9.0
+end
+=========
+isp1
+CONFIG T
+router bgp 45
+bgp log-neighbor-changes
+neighbor 24.2.4.2 remote-as 2
+neighbor 45.4.5.5 remote-as 45
+neighbor 208.8.8.1 remote-as 1
+network 208.8.8.0
+network 24.2.4.0 mask 255.255.255.0
+network 44.44.44.44 mask 255.255.255.255
+network 45.4.5.0 mask 255.255.255.0
+!PretentInternet
+network 0.0.0.0
+ip route 0.0.0.0 0.0.0.0 null 0
+ip route 10.0.0.0 255.0.0.0 208.8.8.1
+end
+==========
+isp2
+config t
+router bgp 2
+bgp log-neighbor-changes
+neighbor 24.2.4.4 remote-as 45
+neighbor 25.2.5.5 remote-as 45
+neighbor 32.3.2.3 remote-as 3
+neighbor 207.7.7.1 remote-as 1
+network 207.0.0.0
+network 22.22.22.22 mask 255.255.255.255
+network 24.2.4.0 mask 255.255.255.0
+network 25.2.5.0 mask 255.255.255.0
+network 32.3.2.0 mask 255.255.255.0
+!fakeInternet
+network 0.0.0.0
+ip route 0.0.0.0 0.0.0.0 null 0
+ip route 10.0.0.0 255.0.0.0 207.7.7.1
+end
+===============
+@@ISP3:
+CONFIG T
+router bgp 3
+bgp log-neighbor-changes
+neighbor 32.3.2.2 remote-as 2
+neighbor 35.3.5.5 remote-as 45
+neighbor 209.9.9.1 remote-as 1
+network 209.9.9.0
+network 32.3.2.0 mask 255.255.255.0
+network 33.33.33.33 mask 255.255.255.255
+network 35.3.5.0 mask 255.255.255.0
+network 0.0.0.0
+ip route 0.0.0.0 0.0.0.0 null 0
+ip route 10.0.0.0 255.0.0.0 209.9.9.1
+end
+===============
+Isp4:
+config t
+int lo 8
+ ip add 8.8.8.8 255.255.255.255
+router bgp 45
+ bgp log-neighbor-changes
+ neighbor 25.2.5.2 remote-as 2
+ neighbor 35.3.5.3 remote-as 3
+ neighbor 45.4.5.4 remote-as 45
+ network 8.8.8.8 mask 255.255.255.255
+ network 55.55.55.55 mask 255.255.255.255
+ network 25.2.5.0 mask 255.255.255.0
+ network 35.3.5.0 mask 255.255.255.0
+ network 45.4.5.0 mask 255.255.255.0
+end
+==================
+
+
+task 8 how check bgp
+
+
+task 9: advanced bgp
+
+use bgp path manipulation to force customer to use other telco:
+ ISP1/PLDT
+ conf t
+ route-map WAGAKO permit 10
+ set as-path prepend 45 45 45 45 
+ exit 
+ router bgp 45
+ neighbor 208.8.8.1 route-map WAGAKO out
+ do clear ip bgp * soft
+ end
+ 
+ dito/ isp2
+ 
+  conf t
+ route-map NOTDITO permit 10
+ set as-path prepend 2 2 2 2 
+ exit 
+ router bgp 2
+ neighbor 207.7.7.1 route-map NOTDITO out
+ do clear ip bgp * soft
+ end
+ 
+ 
+ task 10
+ 
+ why ospf ang bgp are bff
+ 
+ conf t
+	router ospf 1
+		Default-information originate
+		
+		
+		
+		task 11
+		
+		realworld vs cloud based/aws
+		
+		Golden rule in real life - ang mali ko, ramdam nyo lahat.(Real world)
+		mali ko ramdam ko (cloud based)
+		
+		conf t
+		no ip routing 
+		ip routing 
+		end
+		
+Task 11 Conf. ospf in real devices
+corebaba
+conf t
+router ospf 1
+network 10.51.1.0 0.0.0.255 area 0
+network 10.51.10.0 0.0.0.255 area 0
+network 10.51.50.0 0.0.0.255 area 0
+network 10.51.100.0 0.0.0.255 area 0
+network 10.51.51.0 0.0.0.255 area 0
+do sh ip ospf neighbor
+
+
+edge
+conf t
+router ospf 1
+network 200.0.0.0 0.0.0.255 area 0
+network 10.51.51.0 0.0.0.255 area 0
+network 51.0.0.1 0.0.0.0 area 0
+
+
+cucm/endpoint
+conf t
+ip route 0.0.0.0 0.0.0.0 10.51.100.4
+
+
+
+task 12: use bgp to connect other classmates
+
+@edge
+
+conf t 
+	router bgp 51
+	bgp log-neighbor-changes
+	bgp router-id 51.0.0.1
+	neighbor 200.0.0.11 remote-as 11
+	neighbor 200.0.0.12 remote-as 12
+	neighbor 200.0.0.21 remote-as 21
+	neighbor 200.0.0.22 remote-as 22
+	neighbor 200.0.0.31 remote-as 31
+	neighbor 200.0.0.32 remote-as 32
+	neighbor 200.0.0.41 remote-as 41
+	neighbor 200.0.0.42 remote-as 42
+	neighbor 200.0.0.52 remote-as 52
+	neighbor 10.51.51.4 remote-as 51
+	network 10.51.51.0 mask 255.255.255.0
+	
+@coresw
+
+router bgp 51
+	neighbor 10.51.51.1 remote as 51
+	network 10.51.1.0 mask 255.255.255.0
+	network 10.51.100.0 mask 255.255.255.0
+	network 10.51.10.0 mask 255.255.255.0
+	network 10.51.51.0 mask 255.255.255.0
+	
+	
+task 13 10% total score
+
+7/10 job 
+
+task 14 how to hack session layer to steal the password of your boss
+
+how to hi jack session layer
+
+task 15
+
+protecting data vith vpn
+
+configure: encryp cisco data with ssh encryption
+
+Coresw
+
+conf t 
+	ip domain-name rivanit.com
+	crypto key generate rsa
+	
+	
+	
+	
+VPN_JAPAN
+@CSR1000
+config t
+no logging console
+no ip domain-lookup
+int gi 1
+ip add dhcp 
+no shut
+
+VPN_JAPAN@SCRT
+config t
+int gi 2
+ip add 192.168.102.1 255.255.255.0
+no shut
+int gi 3
+ip add 10.10.10.1 255.255.255.0
+no shut
+
+VPN_PH
+@csr1000
+
+config t
+no logging console
+no ip domain-lookup
+int gi 1
+ip add dhcp 
+no shut
+
+@phSCRT
+
+config t
+int gi 2
+ip add 192.168.102.2 255.255.255.0
+no shut
+int gi 3
+ip add 10.20.20.1 255.255.255.0
+no shut
